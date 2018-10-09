@@ -23,7 +23,9 @@ public class HeroControl : MonoBehaviour
         body.AddForce(Vector3.right * horizontalInput * acceleration);
         if (Mathf.Abs(body.velocity.x) > speed)
         {
-            body.velocity = body.velocity.normalized * speed;
+            Vector3 max = body.velocity;
+            max.x = max.normalized.x * speed;
+            body.velocity = max;
         }
     }
 

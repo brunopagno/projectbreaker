@@ -21,10 +21,8 @@ GameObject:
   - component: {fileID: 4159709654003176}
   - component: {fileID: 33871685610539040}
   - component: {fileID: 23113542179840076}
-  - component: {fileID: 136689441350804788}
-  - component: {fileID: 54490275365462674}
-  - component: {fileID: 65240724113642700}
   - component: {fileID: 114804869637428306}
+  - component: {fileID: 143548978886181708}
   m_Layer: 0
   m_Name: Hero
   m_TagString: Untagged
@@ -87,33 +85,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1777691014502270}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
---- !u!54 &54490275365462674
-Rigidbody:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1777691014502270}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 120
-  m_CollisionDetection: 0
---- !u!65 &65240724113642700
-BoxCollider:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1777691014502270}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.4, y: 0.5, z: 0.4}
-  m_Center: {x: 0, y: -1, z: 0}
 --- !u!114 &114804869637428306
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -125,15 +96,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c701083ac6bd14449d4ff54f47fdc4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 54490275365462674}
+  gravity: 0.5
   speed: 2
-  acceleration: 200
-  jump: 450
+  jump: 10
   fireRate: 4
   projectile: {fileID: 1559091665564300, guid: 1f07638048aa0fd4d8db2bfbfe2eb352, type: 2}
   projectileOrigin: {x: 0.6, y: 0.3, z: 0}
---- !u!136 &136689441350804788
-CapsuleCollider:
+--- !u!143 &143548978886181708
+CharacterController:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -141,7 +111,11 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.5
+  serializedVersion: 2
   m_Height: 2
-  m_Direction: 1
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}

@@ -1,87 +1,140 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class HeroControl : MonoBehaviour
 {
-    public Rigidbody body;
+    private CharacterController _controller;
+    private Vector3 _velocity;
 
+    public float gravity = 1;
     public float speed = 2;
-    public float acceleration = 200;
-    public float jump = 450;
+    public float jump = 10;
     public float fireRate = 4;
 
     public GameObject projectile;
     public Vector3 projectileOrigin;
 
-    private bool _isJumping = false;
     private float _timeBetweenShoots;
     private float _timeToShoot;
+    private bool _facingRight = true;
+    public bool FacingRight
+    {
+        get
+        {
+            return _facingRight;
+        }
+    }
 
     private void Start()
     {
+        _velocity = new Vector3();
+        _controller = GetComponent<CharacterController>();
         _timeBetweenShoots = fireRate / 60.0f;
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
-        ResolveRun();
-        ResolveJump();
-        ResolveShoot();
-        //ResolveBreak();
+        Gravity();
+        Run();
+        Jump();
+        Facing();
+        Shoot();
+        //Break();
+        CharacterController();
+        Clear();
     }
 
-    private void ResolveRun()
+    private void Gravity()
+    {
+        _velocity.y -= gravity;
+    }
+
+    private void Run()
     {
         float horizontalInput = Input.GetAxis("Horizontal");
 
-        body.AddForce(Vector3.right * horizontalInput * acceleration);
-        if (Mathf.Abs(body.velocity.x) > speed)
-        {
-            Vector3 max = body.velocity;
-            max.x = max.normalized.x * speed;
-            body.velocity = max;
-        }
+        _velocity.x += horizontalInput * speed;
     }
 
-    private void ResolveJump()
+    private void Jump()
     {
-        if (!_isJumping && Input.GetButtonDown("Jump"))
+        if (_controller.isGrounded && Input.GetButtonDown("Jump"))
         {
-            _isJumping = true;
-            body.velocity = new Vector3(body.velocity.x, 0, body.velocity.z);
-            body.AddForce(Vector3.up * jump);
+            _velocity.y += jump;
         }
     }
 
-    private void ResolveShoot()
+    private void Facing()
+    {
+        if (_velocity.x > 0)
+        {
+            _facingRight = true;
+        }
+        if (_velocity.x < 0)
+        {
+            _facingRight = false;
+        }
+    }
+
+    private void Shoot()
     {
         _timeToShoot += Time.deltaTime;
         if (Input.GetButton("Fire1") && _timeToShoot > _timeBetweenShoots)
         {
-            Instantiate(projectile, transform.position + projectileOrigin, Quaternion.identity);
+            int direction = FacingRight ? 1 : -1;
+
+            GameObject instantiatedProjectile = Instantiate(
+                projectile,
+                transform.position + new Vector3(
+                    projectileOrigin.x * direction,
+                    projectileOrigin.y,
+                    projectileOrigin.z),
+                Quaternion.identity);
+            ProjectileBehaviour projectileBehaviour = instantiatedProjectile.GetComponent<ProjectileBehaviour>();
+            projectileBehaviour.Direction = FacingRight ? 1 : -1;
             _timeToShoot = 0;
         }
     }
 
-    //private void ResolveBreak()
+    //private void Break()
     //{
     //    // nothing here, yet
     //}
 
-    private void OnTriggerEnter(Collider other)
+    private void CharacterController()
     {
-        _isJumping = false;
+        _controller.Move(_velocity * Time.deltaTime);
     }
 
+    private void Clear()
+    {
+        _velocity.x = 0;
+        if (_controller.isGrounded)
+        {
+            _velocity.y = 0;
+        }
+    }
+
+    #region Gizmos
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.cyan;
         float size = 0.2f;
         Gizmos.DrawLine(
-            transform.position + projectileOrigin + new Vector3(0, -size, 0),
-            transform.position + projectileOrigin + new Vector3(0, size, 0)
+            transform.position + new Vector3(projectileOrigin.x * (FacingRight ? 1 : -1),
+                                             projectileOrigin.y,
+                                             projectileOrigin.z) + new Vector3(0, -size, 0),
+            transform.position + new Vector3(projectileOrigin.x * (FacingRight ? 1 : -1),
+                                             projectileOrigin.y,
+                                             projectileOrigin.z) + new Vector3(0, size, 0)
             );
         Gizmos.DrawLine(
-            transform.position + projectileOrigin + new Vector3(-size, 0, 0),
-            transform.position + projectileOrigin + new Vector3(size, 0, 0));
+            transform.position + new Vector3(projectileOrigin.x * (FacingRight ? 1 : -1),
+                                             projectileOrigin.y,
+                                             projectileOrigin.z) + new Vector3(-size, 0, 0),
+            transform.position + new Vector3(projectileOrigin.x * (FacingRight ? 1 : -1),
+                                             projectileOrigin.y,
+                                             projectileOrigin.z) + new Vector3(size, 0, 0));
     }
+    #endregion
 }

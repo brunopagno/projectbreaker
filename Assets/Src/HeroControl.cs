@@ -103,19 +103,6 @@ public class HeroControl : MonoBehaviour
 
     private void Break()
     {
-        if (_isBreaking)
-        {
-            _timeToHideBreak += Time.deltaTime;
-
-            if (_timeToHideBreak > breakDuration)
-            {
-                _isBreaking = false;
-                breakWeapon.SetActive(false);
-
-                _timeToHideBreak = 0;
-            }
-        }
-
         _timeToBreak += Time.deltaTime;
         if (Input.GetButtonDown("Fire2") && _timeToBreak > _timeBetweenBreaks)
         {
@@ -138,6 +125,28 @@ public class HeroControl : MonoBehaviour
 
             _timeToBreak = 0;
         }
+
+        if (_isBreaking)
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position + breakOrigin, transform.position + breakOrigin + Vector3.right * breakReach * _direction, out hit))
+            {
+                if (hit.collider.tag == "Player")
+                {
+                    Debug.Log("I HIT A GUY");
+                }
+            }
+
+            if (_timeToHideBreak > breakDuration)
+            {
+                _isBreaking = false;
+                breakWeapon.SetActive(false);
+
+                _timeToHideBreak = 0;
+            }
+
+            _timeToHideBreak += Time.deltaTime;
+        }
     }
 
     private void CharacterController()
@@ -151,6 +160,14 @@ public class HeroControl : MonoBehaviour
         if (_controller.isGrounded)
         {
             _velocity.y = 0;
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Projectile")
+        {
+            Debug.Log("TOMEI UN TIRO!");
         }
     }
 

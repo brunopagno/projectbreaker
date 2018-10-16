@@ -10,26 +10,32 @@ public class HeroControl : MonoBehaviour
     public float speed = 2;
     public float jump = 10;
     public float fireRate = 4;
+    public float breakFreq = 1.25f;
+    public float breakDuration = 0.12f;
 
     public GameObject projectile;
     public Vector3 projectileOrigin;
-
     private float _timeBetweenShoots;
     private float _timeToShoot;
-    private bool _facingRight = true;
-    public bool FacingRight
-    {
-        get
-        {
-            return _facingRight;
-        }
-    }
+
+    public GameObject breakWeapon;
+    public Vector3 breakOrigin;
+    public float breakReach;
+    private float _timeBetweenBreaks;
+    private float _timeToBreak;
+    private float _timeToHideBreak;
+    private Boolean _isBreaking;
+
+    //  1 => right
+    // -1 => left
+    private int _direction = 1;
 
     private void Start()
     {
         _velocity = new Vector3();
         _controller = GetComponent<CharacterController>();
-        _timeBetweenShoots = fireRate / 60.0f;
+        _timeBetweenShoots = 1f / fireRate;
+        _timeBetweenBreaks = 1f / breakFreq;
     }
 
     private void Update()
@@ -39,7 +45,7 @@ public class HeroControl : MonoBehaviour
         Jump();
         Facing();
         Shoot();
-        //Break();
+        Break();
         CharacterController();
         Clear();
     }
@@ -68,11 +74,11 @@ public class HeroControl : MonoBehaviour
     {
         if (_velocity.x > 0)
         {
-            _facingRight = true;
+            _direction = 1;
         }
         if (_velocity.x < 0)
         {
-            _facingRight = false;
+            _direction = -1;
         }
     }
 
@@ -81,25 +87,58 @@ public class HeroControl : MonoBehaviour
         _timeToShoot += Time.deltaTime;
         if (Input.GetButton("Fire1") && _timeToShoot > _timeBetweenShoots)
         {
-            int direction = FacingRight ? 1 : -1;
-
             GameObject instantiatedProjectile = Instantiate(
                 projectile,
                 transform.position + new Vector3(
-                    projectileOrigin.x * direction,
+                    projectileOrigin.x * _direction,
                     projectileOrigin.y,
                     projectileOrigin.z),
                 Quaternion.identity);
             ProjectileBehaviour projectileBehaviour = instantiatedProjectile.GetComponent<ProjectileBehaviour>();
-            projectileBehaviour.Direction = FacingRight ? 1 : -1;
+            projectileBehaviour.Direction = _direction;
+
             _timeToShoot = 0;
         }
     }
 
-    //private void Break()
-    //{
-    //    // nothing here, yet
-    //}
+    private void Break()
+    {
+        if (_isBreaking)
+        {
+            _timeToHideBreak += Time.deltaTime;
+
+            if (_timeToHideBreak > breakDuration)
+            {
+                _isBreaking = false;
+                breakWeapon.SetActive(false);
+
+                _timeToHideBreak = 0;
+            }
+        }
+
+        _timeToBreak += Time.deltaTime;
+        if (Input.GetButtonDown("Fire2") && _timeToBreak > _timeBetweenBreaks)
+        {
+            _isBreaking = true;
+
+            if (_direction > 0)
+            {
+                breakWeapon.transform.rotation = Quaternion.identity;
+                breakWeapon.transform.position = transform.position + breakOrigin;
+            }
+            else
+            {
+                breakWeapon.transform.rotation = Quaternion.Euler(0, 180, 0);
+                breakWeapon.transform.position = transform.position + new Vector3(breakOrigin.x * _direction,
+                                                                                  breakOrigin.y,
+                                                                                  breakOrigin.z);
+            }
+
+            breakWeapon.SetActive(true);
+
+            _timeToBreak = 0;
+        }
+    }
 
     private void CharacterController()
     {
@@ -121,20 +160,30 @@ public class HeroControl : MonoBehaviour
         Gizmos.color = Color.cyan;
         float size = 0.2f;
         Gizmos.DrawLine(
-            transform.position + new Vector3(projectileOrigin.x * (FacingRight ? 1 : -1),
-                                             projectileOrigin.y,
-                                             projectileOrigin.z) + new Vector3(0, -size, 0),
-            transform.position + new Vector3(projectileOrigin.x * (FacingRight ? 1 : -1),
-                                             projectileOrigin.y,
-                                             projectileOrigin.z) + new Vector3(0, size, 0)
+            transform.position + new Vector3(projectileOrigin.x * _direction,
+                                             projectileOrigin.y - size,
+                                             projectileOrigin.z),
+            transform.position + new Vector3(projectileOrigin.x * _direction,
+                                             projectileOrigin.y + size,
+                                             projectileOrigin.z)
             );
         Gizmos.DrawLine(
-            transform.position + new Vector3(projectileOrigin.x * (FacingRight ? 1 : -1),
+            transform.position + new Vector3(projectileOrigin.x * _direction - size,
                                              projectileOrigin.y,
-                                             projectileOrigin.z) + new Vector3(-size, 0, 0),
-            transform.position + new Vector3(projectileOrigin.x * (FacingRight ? 1 : -1),
+                                             projectileOrigin.z),
+            transform.position + new Vector3(projectileOrigin.x * _direction + size,
                                              projectileOrigin.y,
-                                             projectileOrigin.z) + new Vector3(size, 0, 0));
+                                             projectileOrigin.z));
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawLine(
+            transform.position + new Vector3(breakOrigin.x * _direction,
+                                             breakOrigin.y,
+                                             breakOrigin.z),
+            transform.position + new Vector3(breakOrigin.x * _direction + breakReach * _direction,
+                                             breakOrigin.y,
+                                             breakOrigin.z)
+            );
     }
     #endregion
 }

@@ -6,25 +6,34 @@ public class HeroControl : MonoBehaviour
     private CharacterController _controller;
     private Vector3 _velocity;
 
+    // Base attributes
     public float gravity = 1;
     public float speed = 2;
     public float jump = 10;
     public float fireRate = 4;
     public float breakFreq = 1.25f;
     public float breakDuration = 0.12f;
+    public float baseHealth = 100;
+    public float regen = 1;
 
+    // Damage
+    public GameObject blueDamage;
+    private float _blueDamage = 0;
+
+    // Projectile
     public GameObject projectile;
+    public GameObject projectileCooldown;
     public Vector3 projectileOrigin;
-    private float _timeBetweenShoots;
-    private float _timeToShoot;
+    private Cooldown _projectileCooldown;
 
+    // Break
     public GameObject breakWeapon;
+    public GameObject breakWeaponCooldown;
     public Vector3 breakOrigin;
     public float breakReach;
-    private float _timeBetweenBreaks;
-    private float _timeToBreak;
+    private Cooldown _breakCooldown;
     private float _timeToHideBreak;
-    private Boolean _isBreaking;
+    private bool _isBreaking;
 
     //  1 => right
     // -1 => left
@@ -34,8 +43,8 @@ public class HeroControl : MonoBehaviour
     {
         _velocity = new Vector3();
         _controller = GetComponent<CharacterController>();
-        _timeBetweenShoots = 1f / fireRate;
-        _timeBetweenBreaks = 1f / breakFreq;
+        _projectileCooldown = new Cooldown(1f / fireRate);
+        _breakCooldown = new Cooldown(1f / breakFreq);
     }
 
     private void Update()
@@ -48,6 +57,7 @@ public class HeroControl : MonoBehaviour
         Break();
         CharacterController();
         Clear();
+        RegenDamage();
     }
 
     private void Gravity()
@@ -84,8 +94,8 @@ public class HeroControl : MonoBehaviour
 
     private void Shoot()
     {
-        _timeToShoot += Time.deltaTime;
-        if (Input.GetButton("Fire1") && _timeToShoot > _timeBetweenShoots)
+        _projectileCooldown.Update();
+        if (Input.GetButton("Fire1") && _projectileCooldown.Ready)
         {
             GameObject instantiatedProjectile = Instantiate(
                 projectile,
@@ -97,14 +107,16 @@ public class HeroControl : MonoBehaviour
             ProjectileBehaviour projectileBehaviour = instantiatedProjectile.GetComponent<ProjectileBehaviour>();
             projectileBehaviour.Direction = _direction;
 
-            _timeToShoot = 0;
+            _projectileCooldown.Reset();
         }
+
+        UpdateUiCooldowonBar(projectileCooldown, _projectileCooldown.Readyness);
     }
 
     private void Break()
     {
-        _timeToBreak += Time.deltaTime;
-        if (Input.GetButtonDown("Fire2") && _timeToBreak > _timeBetweenBreaks)
+        _breakCooldown.Update();
+        if (Input.GetButtonDown("Fire2") && _breakCooldown.Ready)
         {
             _isBreaking = true;
 
@@ -123,7 +135,7 @@ public class HeroControl : MonoBehaviour
 
             breakWeapon.SetActive(true);
 
-            _timeToBreak = 0;
+            _breakCooldown.Reset();
         }
 
         if (_isBreaking)
@@ -147,6 +159,8 @@ public class HeroControl : MonoBehaviour
 
             _timeToHideBreak += Time.deltaTime;
         }
+
+        UpdateUiCooldowonBar(breakWeaponCooldown, _breakCooldown.Readyness);
     }
 
     private void CharacterController()
@@ -163,12 +177,33 @@ public class HeroControl : MonoBehaviour
         }
     }
 
+    private void RegenDamage()
+    {
+        _blueDamage -= Time.deltaTime;
+        if (_blueDamage < 0)
+        {
+            _blueDamage = 0;
+        }
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.tag == "Projectile")
         {
-            Debug.Log("TOMEI UN TIRO!");
+            ProjectileBehaviour projectileBehaviour = projectile.GetComponent<ProjectileBehaviour>();
+            _blueDamage += projectileBehaviour.baseDamage;
+            if (_blueDamage > baseHealth)
+            {
+                _blueDamage = baseHealth;
+            }
         }
+    }
+
+    private void UpdateUiCooldowonBar(GameObject cooldownBar, float readynessPercent)
+    {
+        Vector3 scale = cooldownBar.transform.localScale;
+        scale.Set(readynessPercent, scale.y, scale.z);
+        cooldownBar.transform.localScale = scale;
     }
 
     #region Gizmos

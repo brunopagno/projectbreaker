@@ -3,6 +3,7 @@
 public class ProjectileBehaviour : MonoBehaviour
 {
     public float speed = 8;
+    public float baseDamage = 10;
 
     public int Direction { get; set; }
 

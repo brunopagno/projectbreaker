@@ -17,6 +17,8 @@ public class HeroControl : MonoBehaviour
     public float baseHealth = 100;
     public float regen = 1;
 
+    private float _currentHealth;
+
     // LifeBar
     public GameObject HealthBar;
     public GameObject BlueDamage;
@@ -46,6 +48,8 @@ public class HeroControl : MonoBehaviour
         _controller = GetComponent<CharacterController>();
         _projectileCooldown = new Cooldown(1f / fireRate);
         _breakCooldown = new Cooldown(1f / breakFreq);
+
+        _currentHealth = baseHealth;
     }
 
     private void Update()
@@ -172,7 +176,10 @@ public class HeroControl : MonoBehaviour
 
     private void Health()
     {
-        UpdateUiCooldownBar(HealthBar, 1 - _blueDamage / baseHealth);
+        float currentHealthPercentual = _currentHealth / baseHealth;
+        UpdateUiCooldownBar(BlueDamage, currentHealthPercentual);
+        UpdateUiCooldownBar(HealthBar, currentHealthPercentual - _blueDamage / baseHealth);
+        Debug.Log(baseHealth + ", " + _currentHealth + ", " + _blueDamage);
     }
 
     private void RegenDamage()
@@ -190,14 +197,19 @@ public class HeroControl : MonoBehaviour
         {
             ProjectileBehaviour projectileBehaviour = Projectile.GetComponent<ProjectileBehaviour>();
             _blueDamage += projectileBehaviour.baseDamage;
-            if (_blueDamage > baseHealth)
+            if (_blueDamage > _currentHealth)
             {
-                _blueDamage = baseHealth;
+                _blueDamage = _currentHealth;
             }
         }
         if (other.tag == "BreakWeapon")
         {
-            Debug.Log("HIT BY WEAPON!");
+            _currentHealth -= _blueDamage;
+            _blueDamage = 0;
+            if (_currentHealth < 0)
+            {
+                _currentHealth = 0;
+            }
         }
     }
 

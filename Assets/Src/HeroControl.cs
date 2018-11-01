@@ -13,9 +13,9 @@ public class HeroControl : MonoBehaviour
     public float fireRate = 4;
     public float breakFreq = 1.25f;
     public float breakDuration = 0.12f;
-    public float breakReach = 1.8f;
     public float baseHealth = 100;
     public float regen = 1;
+    public float executeThreshold = 5f;
 
     private float _currentHealth;
 
@@ -176,10 +176,15 @@ public class HeroControl : MonoBehaviour
 
     private void Health()
     {
+        if (_currentHealth <= executeThreshold)
+        {
+            Animator animator = HealthBar.GetComponent<Animator>();
+            animator.SetBool("ExecuteHealth", true);
+        }
+
         float currentHealthPercentual = _currentHealth / baseHealth;
         UpdateUiCooldownBar(BlueDamage, currentHealthPercentual);
         UpdateUiCooldownBar(HealthBar, currentHealthPercentual - _blueDamage / baseHealth);
-        Debug.Log(baseHealth + ", " + _currentHealth + ", " + _blueDamage);
     }
 
     private void RegenDamage()
@@ -204,11 +209,19 @@ public class HeroControl : MonoBehaviour
         }
         if (other.tag == "BreakWeapon")
         {
-            _currentHealth -= _blueDamage;
-            _blueDamage = 0;
-            if (_currentHealth < 0)
+            if (_currentHealth <= executeThreshold)
             {
                 _currentHealth = 0;
+                _blueDamage = 0;
+            }
+            else
+            {
+                _currentHealth -= _blueDamage;
+                _blueDamage = 0;
+                if (_currentHealth < 0)
+                {
+                    _currentHealth = 0;
+                }
             }
         }
     }
@@ -246,7 +259,7 @@ public class HeroControl : MonoBehaviour
             transform.position + new Vector3(BreakOrigin.x * _direction,
                                              BreakOrigin.y,
                                              BreakOrigin.z),
-            transform.position + new Vector3(BreakOrigin.x * _direction + breakReach * _direction,
+            transform.position + new Vector3(BreakOrigin.x * _direction + 1.5f * _direction,
                                              BreakOrigin.y,
                                              BreakOrigin.z)
             );

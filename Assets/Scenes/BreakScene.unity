@@ -442,6 +442,29 @@ Prefab:
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 1527741020539150, guid: 52ae601b6a8f67f4296a9eaa49b95a81, type: 2}
+      propertyPath: m_Name
+      value: Borders
+      objectReference: {fileID: 0}
+    - target: {fileID: 1223788563296164, guid: 52ae601b6a8f67f4296a9eaa49b95a81, type: 2}
+      propertyPath: m_Name
+      value: HealthBorder
+      objectReference: {fileID: 0}
+    - target: {fileID: 212758132999254974, guid: 52ae601b6a8f67f4296a9eaa49b95a81,
+        type: 2}
+      propertyPath: m_Color.r
+      value: 0.18867922
+      objectReference: {fileID: 0}
+    - target: {fileID: 212758132999254974, guid: 52ae601b6a8f67f4296a9eaa49b95a81,
+        type: 2}
+      propertyPath: m_Color.g
+      value: 0.18867922
+      objectReference: {fileID: 0}
+    - target: {fileID: 212758132999254974, guid: 52ae601b6a8f67f4296a9eaa49b95a81,
+        type: 2}
+      propertyPath: m_Color.b
+      value: 0.18867922
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 52ae601b6a8f67f4296a9eaa49b95a81, type: 2}
   m_IsPrefabAsset: 0

@@ -5,6 +5,7 @@ public class ProjectileBehaviour : MonoBehaviour
     public float speed = 8;
     public float baseDamage = 10;
 
+    public int OwnerId { get; set; }
     public int Direction { get; set; }
 
     private float _limit = 40;

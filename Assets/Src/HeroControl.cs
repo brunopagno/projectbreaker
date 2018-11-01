@@ -1,8 +1,10 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class HeroControl : MonoBehaviour
 {
+    private int _heroId = -1;
+    private static int _nextHeroId = 1;
+
     private CharacterController _controller;
     private Vector3 _velocity;
 
@@ -44,6 +46,9 @@ public class HeroControl : MonoBehaviour
 
     private void Start()
     {
+        _heroId = _nextHeroId;
+        _nextHeroId += 1;
+
         _velocity = new Vector3();
         _controller = GetComponent<CharacterController>();
         _projectileCooldown = new Cooldown(1f / fireRate);
@@ -111,6 +116,7 @@ public class HeroControl : MonoBehaviour
                     ProjectileOrigin.z),
                 Quaternion.identity);
             ProjectileBehaviour projectileBehaviour = instantiatedProjectile.GetComponent<ProjectileBehaviour>();
+            projectileBehaviour.OwnerId = _heroId;
             projectileBehaviour.Direction = _direction;
 
             _projectileCooldown.Reset();
@@ -198,9 +204,17 @@ public class HeroControl : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        // ignore collisions with self
+        HeroControl heroControl = other.GetComponentInParent<HeroControl>();
+        ProjectileBehaviour projectileBehaviour = other.GetComponent<ProjectileBehaviour>();
+        if (heroControl != null && heroControl._heroId == _heroId ||
+            projectileBehaviour != null && projectileBehaviour.OwnerId == _heroId)
+        {
+            return;
+        }
+
         if (other.tag == "Projectile")
         {
-            ProjectileBehaviour projectileBehaviour = Projectile.GetComponent<ProjectileBehaviour>();
             _blueDamage += projectileBehaviour.baseDamage;
             if (_blueDamage > _currentHealth)
             {

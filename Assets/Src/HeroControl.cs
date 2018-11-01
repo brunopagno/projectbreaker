@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class HeroControl : MonoBehaviour
 {
@@ -19,6 +20,7 @@ public class HeroControl : MonoBehaviour
     public float regen = 1;
     public float executeThreshold = 5f;
 
+    private bool _isDead = false;
     private float _currentHealth;
 
     // LifeBar
@@ -59,16 +61,20 @@ public class HeroControl : MonoBehaviour
 
     private void Update()
     {
-        Gravity();
-        Run();
-        Jump();
-        Facing();
-        Shoot();
-        Break();
-        CharacterController();
-        Clear();
-        Health();
-        RegenDamage();
+        if (!_isDead)
+        {
+            Gravity();
+            Run();
+            Jump();
+            Facing();
+            Shoot();
+            Break();
+            CharacterController();
+            Clear();
+            Health();
+            RegenDamage();
+            Death();
+        }
     }
 
     private void Gravity()
@@ -237,6 +243,17 @@ public class HeroControl : MonoBehaviour
                     _currentHealth = 0;
                 }
             }
+        }
+    }
+
+    private void Death()
+    {
+        if (_currentHealth <= 0)
+        {
+            _isDead = true;
+            Animator heroAnimator = GetComponent<Animator>();
+            heroAnimator.SetBool("IsDead", _isDead);
+            BreakWeapon.SetActive(false);
         }
     }
 

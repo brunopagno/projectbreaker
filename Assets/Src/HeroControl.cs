@@ -7,6 +7,7 @@ public class HeroControl : MonoBehaviour
     private static int _nextHeroId = 1;
 
     private CharacterController _controller;
+    private InputController _inputController;
     private Vector3 _velocity;
 
     // Base attributes
@@ -51,6 +52,8 @@ public class HeroControl : MonoBehaviour
         _heroId = _nextHeroId;
         _nextHeroId += 1;
 
+        _inputController = new InputController();
+
         _velocity = new Vector3();
         _controller = GetComponent<CharacterController>();
         _projectileCooldown = new Cooldown(1f / fireRate);
@@ -84,14 +87,14 @@ public class HeroControl : MonoBehaviour
 
     private void Run()
     {
-        float horizontalInput = Input.GetAxis("Horizontal");
+        float horizontalInput = _inputController.GetAxis("Horizontal");
 
         _velocity.x += horizontalInput * speed;
     }
 
     private void Jump()
     {
-        if (_controller.isGrounded && Input.GetButtonDown("Jump"))
+        if (_controller.isGrounded && _inputController.GetButtonDown("Jump"))
         {
             _velocity.y += jump;
         }
@@ -112,7 +115,7 @@ public class HeroControl : MonoBehaviour
     private void Shoot()
     {
         _projectileCooldown.Update();
-        if (Input.GetButton("Fire1") && _projectileCooldown.Ready)
+        if (_inputController.GetButton("Fire1") && _projectileCooldown.Ready)
         {
             GameObject instantiatedProjectile = Instantiate(
                 Projectile,
@@ -134,7 +137,7 @@ public class HeroControl : MonoBehaviour
     private void Break()
     {
         _breakCooldown.Update();
-        if (Input.GetButtonDown("Fire2") && _breakCooldown.Ready)
+        if (_inputController.GetButtonDown("Fire2") && _breakCooldown.Ready)
         {
             _isBreaking = true;
 

@@ -14,6 +14,7 @@ public class HeroControl : MonoBehaviour
     public float gravity = 1;
     public float speed = 2;
     public float jump = 10;
+    public int jumps = 2;
     public float fireRate = 4;
     public float breakFreq = 1.25f;
     public float breakDuration = 0.12f;
@@ -23,6 +24,7 @@ public class HeroControl : MonoBehaviour
 
     private bool _isDead = false;
     private float _currentHealth;
+    private int _jumps = 0;
 
     // LifeBar
     public GameObject HealthBar;
@@ -94,9 +96,15 @@ public class HeroControl : MonoBehaviour
 
     private void Jump()
     {
-        if (_controller.isGrounded && _inputController.GetButtonDown("Jump"))
+        if (_controller.isGrounded)
         {
-            _velocity.y += jump;
+            _jumps = 0;
+        }
+
+        if (_jumps < jumps && _inputController.GetButtonDown("Jump"))
+        {
+            _jumps += 1;
+            _velocity.y = jump;
         }
     }
 

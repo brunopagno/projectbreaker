@@ -9,6 +9,7 @@ public class HeroControl : MonoBehaviour
     private CharacterController _controller;
     private InputController _inputController;
     private Vector3 _velocity;
+    private Vector3 _velocityBeforeBreak;
 
     // Base attributes
     public float gravity = 1;
@@ -75,7 +76,6 @@ public class HeroControl : MonoBehaviour
             Shoot();
             Break();
             CharacterController();
-            Clear();
             Health();
             RegenDamage();
             Death();
@@ -148,6 +148,7 @@ public class HeroControl : MonoBehaviour
         if (_inputController.GetButtonDown("Fire2") && _breakCooldown.Ready)
         {
             _isBreaking = true;
+            _velocityBeforeBreak = _velocity;
 
             if (_direction > 0)
             {
@@ -175,6 +176,7 @@ public class HeroControl : MonoBehaviour
                 BreakWeapon.SetActive(false);
 
                 _timeToHideBreak = 0;
+                _velocity = _velocityBeforeBreak;
             }
 
             _timeToHideBreak += Time.deltaTime;
@@ -185,11 +187,11 @@ public class HeroControl : MonoBehaviour
 
     private void CharacterController()
     {
-        _controller.Move(_velocity * Time.deltaTime);
-    }
+        if (!_isBreaking)
+        {
+            _controller.Move(_velocity * Time.deltaTime);
+        }
 
-    private void Clear()
-    {
         _velocity.x = 0;
         if (_controller.isGrounded)
         {

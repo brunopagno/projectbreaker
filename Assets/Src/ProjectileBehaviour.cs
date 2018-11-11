@@ -19,4 +19,15 @@ public class ProjectileBehaviour : MonoBehaviour
             Destroy(this.gameObject);
         }
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        HeroControl heroControl = other.GetComponentInParent<HeroControl>();
+        if (heroControl != null && heroControl.HeroId == OwnerId)
+        {
+            return;
+        }
+
+        Destroy(this.gameObject);
+    }
 }

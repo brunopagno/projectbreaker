@@ -4,6 +4,7 @@ using UnityEngine;
 public class HeroControl : MonoBehaviour
 {
     private int _heroId = -1;
+    public int HeroId { get { return _heroId; } }
     private static int _nextHeroId = 1;
 
     private CharacterController _controller;
@@ -214,7 +215,7 @@ public class HeroControl : MonoBehaviour
 
     private void RegenDamage()
     {
-        _blueDamage -= Time.deltaTime;
+        _blueDamage -= Time.deltaTime * regen;
         if (_blueDamage < 0)
         {
             _blueDamage = 0;
